@@ -37,23 +37,24 @@ API 使用范式标杆(defineTool 携带 JSON schema,类型安全)。
 | dsh-gitkit | ./dist/index.js | src + dist(已清 lib) | ✅ createHonoApp + mount |
 | dsh-plugin-doctor | ./dist/index.js | src + dist(已清 lib) | ✅ createHonoApp + mount |
 | dsh-snapshot | ./dist/index.js | src + dist(已清 lib) | ✅ createHonoApp + mount |
-| dsh-skill-pack | ./dist/index.js | src + dist(技能为文本资源) | — |
-| dsh-lib-analyzer | ./lib/index.js | 纯 JS,无 src | — |
-| dsh-session-handoff | ./lib/index.js | 纯 JS,无 src | — |
+| dsh-lib-analyzer | ./dist/index.js | src + dist(纯 JS 已迁 TS,lib 已清) | ✅ createHonoApp + mount |
+| dsh-skill-pack | ./dist/index.js | src + dist(技能文本;宿主注入包用 types shim) | ✅ createHonoApp + mount |
+| dsh-session-handoff | ./lib/index.js | 纯 JS,无 src | —(宿主关键插件,保持稳定) |
 | dsh-codex | ./dist/index.js | src + dist + Hono | ✅(范式源头) |
 
-### Hono 化已落地(本轮完成 ✅)
+### Hono 化已落地(全部完成 ✅)
 
-dsh-gitkit / dsh-plugin-doctor / dsh-snapshot 已按 dsh-codex 同款模式加
-`createHonoApp` 工厂(health/version 端点)+ `ctx.http?.mount` 尝试挂载,hono
-4.13.3 为运行时依赖,tsc 编译通过,冒烟测试全部 200。commit:
-gitkit `8581187`、doctor `5a13d0c`、snapshot `962a976`。
+- Round 4: dsh-gitkit `8581187` / dsh-plugin-doctor `5a13d0c` / dsh-snapshot `962a976`
+- Round 5: **dsh-lib-analyzer** `967c9de`(纯 JS → TS + Hono 逐行迁移,
+  libscan/libtasks 功能回归通过)、**dsh-skill-pack** `1efc45f`(薄层 + 类型 shim
+  `types/dsh-skill-filesystem.d.ts`,health 返回技能数 29)
+- 全部 `createHonoApp` 工厂 + `ctx.http?.mount` 尝试挂载,冒烟 200。
 
 ## 3. 后续建议
 
-1. **dsh-lib-analyzer / dsh-session-handoff Hono 化**:这两个仍为纯 JS lib。
-   迁移 src/index.ts + Hono 工程量大且 session-handoff 是宿主关键插件,
-   建议后续轮次单独处理(先 TS 化,再逐步加 Hono)。
+1. **dsh-session-handoff Hono 化**:唯一剩余纯 JS 插件,但它是宿主关键插件
+   (ACP 压缩后端),多文件 ESM + defineTool 模式,迁移风险高;保持现状,
+   仅在有明确收益时(如需要 HTTP 管理端点)再动。
 2. **统一 main 路径**:长期目标所有插件 `main=./dist/index.js` + prepack 构建脚本,
    发布 npm 时自动编译。
 3. **CI**:仓库均已 public,可加 GitHub Actions(tsc --noEmit + 冒烟测试)防止
