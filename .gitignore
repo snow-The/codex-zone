@@ -1,2 +1,7 @@
 ref/
 node_modules/
+codex/
+codex-action/
+codex-plugin-cc/
+codex-security/
+hono/
